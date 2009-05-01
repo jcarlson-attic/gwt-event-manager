@@ -2,5 +2,4 @@
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.google.gwt.user.theme.standard.Standard" />
 	<inherits name="Dojo" />
-	<entry-point class="com.playon.client.EventManager"></entry-point>
 </module>

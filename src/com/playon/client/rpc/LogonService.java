@@ -1,6 +1,6 @@
 package com.playon.client.rpc;
 
-import com.playon.client.util.Deferred;
+import dojo.Deferred;
 
 public interface LogonService {
 

@@ -1,4 +1,4 @@
-package com.playon.client.util;
+package dojo;
 
 public interface DeferredCommand {
 

@@ -1,6 +1,7 @@
-package com.playon.client.util;
+package dojo;
 
 import java.util.LinkedList;
+
 
 public class Deferred {
 

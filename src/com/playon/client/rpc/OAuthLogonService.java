@@ -1,7 +1,8 @@
 package com.playon.client.rpc;
 
-import com.playon.client.util.Deferred;
-import com.playon.client.util.DeferredCommand;
+
+import dojo.Deferred;
+import dojo.DeferredCommand;
 
 public class OAuthLogonService implements LogonService {
 

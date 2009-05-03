@@ -1,6 +1,5 @@
 package com.playon.rpc.client;
 
-
 import dojo.Deferred;
 import dojo.DeferredCommand;
 
@@ -9,74 +8,25 @@ public class OAuthLogonService implements LogonService {
 	private Deferred requestToken;
 
 	public OAuthLogonService() {
+		// Get a requestToken for this service instance
 		this.requestToken = this.getRequestToken();
-		this.requestToken.addCallback(new DeferredCommand() {
-			@Override
-			public <T> T execute(T result) {
-				OAuthLogonService.this.processToken(result);
-				return result;
-			}
-		});
 	}
 
 	@Override
-	public Deferred logon(final String username, final String password) {
+	public Deferred logon(String username, String password) {
 		final Deferred logon = new Deferred();
-		final OAuthLogonService self = this;
 
-		this.requestToken.addCallback(new DeferredCommand() {
-			@Override
-			public <T> T execute(final T rToken) {
-				Deferred authz = self.authorizeToken(username, password,
-						(String) rToken);
+		// Wait for the requestToken to be available
+		logon.addDeferred(this.requestToken);
 
-				authz.addCallback(new DeferredCommand() {
-					@Override
-					public <V> V execute(V response) {
-						Deferred aToken = self.getAccessToken((String) rToken);
+		// Authorize requestToken with username and password
+		logon.addDeferred(this.authorizeToken(username, password));
 
-						aToken.addCallback(new DeferredCommand() {
-							@Override
-							public <W> W execute(W aToken) {
-								Object credentials = self.processToken(aToken);
-								self.persistCredentials(credentials);
-								logon.callback(true);
-								return aToken;
-							}
-						});
-						aToken.addErrback(new DeferredCommand() {
-							@Override
-							public <X> X execute(X error) {
-								logon.errback(error);
-								return error;
-							}
-						});
+		// Retrieve the accessToken
+		logon.addDeferred(this.getAccessToken());
 
-						return response;
-					}
-				});
-				authz.addErrback(new DeferredCommand() {
-					@Override
-					public <Y> Y execute(Y err) {
-						if (err instanceof IllegalArgumentException) {
-							logon.errback("INVALID CREDENTIALS");
-						} else {
-							logon.errback(err);
-						}
-						return err;
-					}
-				});
-				return rToken;
-			}
-		});
-		this.requestToken.addErrback(new DeferredCommand() {
-			@Override
-			public <T> T execute(T error) {
-				logon.errback(error);
-				return error;
-			}
-		});
-
+		// Kickoff the deferred chain
+		logon.callback(null);
 		return logon;
 	}
 
@@ -86,20 +36,75 @@ public class OAuthLogonService implements LogonService {
 	}
 
 	private Deferred getRequestToken() {
-		return new Deferred();
+		final Deferred dfd = new Deferred();
+
+		dfd.addCallbacks(new DeferredCommand() {
+			@Override
+			public <T> Object execute(T result) {
+				return OAuthLogonService.this.processToken(result);
+			}
+		}, new DeferredCommand() {
+			@Override
+			public <T> Object execute(T result) {
+				return new RuntimeException(
+						"Unable to retrieve OAuth Request Token");
+			}
+		});
+
+		// Now do HTTP request for Request Token
+		// Success/Error on HTTP request should invoke
+		// dfd.callback(rawToken) or dfd.errback(error)
+
+		return dfd;
 	}
 
-	private Deferred authorizeToken(String username, String password,
-			String token) {
-		return new Deferred();
+	private Deferred authorizeToken(final String username, final String password) {
+		// this deferred needs to return the requestToken it was called with
+		Deferred dfd = new Deferred();
+		dfd.addCallback(new DeferredCommand() {
+			@Override
+			public <T> Deferred execute(T rToken) {
+				Deferred http = new Deferred();
+
+				// Do HTTP request to authorize token
+				// Success/Error on HTTP request should invoke
+				// dfd.callback(rToken) or dfd.errback(error)
+
+				return http;
+			}
+		});
+
+		return dfd;
 	}
 
-	private Deferred getAccessToken(String rToken) {
-		return new Deferred();
+	private Deferred getAccessToken() {
+		// this deferred should return true when user is logged on
+		Deferred dfd = new Deferred();
+		dfd.addCallback(new DeferredCommand() {
+			@Override
+			public <T> Deferred execute(T rToken) {
+				Deferred http = new Deferred();
+
+				// Do HTTP request to authorize token
+				// Success/Error on HTTP request should invoke
+				// dfd.callback(true) or dfd.errback(error)
+				String rawToken = "";
+
+				Object aToken = OAuthLogonService.this.processToken(rawToken);
+				OAuthLogonService.this.persistCredentials(aToken);
+
+				http.callback(Boolean.TRUE);
+
+				return http;
+			}
+		});
+
+		return dfd;
 	}
 
 	private Object processToken(Object rawToken) {
-		return rawToken;
+		Object processedToken = null;
+		return processedToken;
 	}
 
 	private void persistCredentials(Object credentials) {

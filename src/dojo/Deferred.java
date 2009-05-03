@@ -2,7 +2,6 @@ package dojo;
 
 import java.util.LinkedList;
 
-
 public class Deferred {
 
 	private static int _nextId = 1;
@@ -40,7 +39,7 @@ public class Deferred {
 			}
 			if (this.fired == -1) {
 				if (!(err instanceof Exception)) {
-					err = new DeferredException(err, "cancel");
+					err = new DeferredCancelledException(err);
 				}
 				this.errback(err);
 			}
@@ -57,7 +56,7 @@ public class Deferred {
 	public <T> void errback(T result) {
 		this.check();
 		if (!(result instanceof Exception)) {
-			this.resback(new DeferredException(result, "error"));
+			this.resback(new DeferredExecutionException(result));
 		} else {
 			this.resback(result);
 		}
@@ -86,6 +85,17 @@ public class Deferred {
 		return this;
 	}
 
+	public Deferred addDeferred(final Deferred dfd) {
+		DeferredCommand dc = new DeferredCommand() {
+			@Override
+			public <T> Object execute(T result) {
+				return dfd;
+			}
+		};
+		this.addBoth(dc);
+		return this;
+	}
+
 	private <T> void resback(T result) {
 		this.fired = ((result instanceof Exception) ? 1 : 0);
 		this.results[this.fired] = result;
@@ -104,30 +114,30 @@ public class Deferred {
 	private void fire() {
 		LinkedList<DeferredCommand[]> chain = this.chain;
 		int fired = this.fired;
-		Object res = this.results[fired];
-		final Deferred self = this;
+		Object result = this.results[fired];
 		DeferredCommand cb = null;
 
 		while ((chain.size() > 0) && this.paused == 0) {
-			DeferredCommand f = chain.poll()[fired];
-			if (f == null) {
+			DeferredCommand dc = chain.poll()[fired];
+			if (dc == null) {
 				continue;
 			}
 			try {
-				Object ret = f.execute(res);
-				if (ret != null) {
-					res = ret;
+				Object r = dc.execute(result);
+				if (r != result) {
+					result = r;
 				}
-				fired = ((res instanceof Exception) ? 1 : 0);
-				if (res instanceof Deferred) {
+				fired = ((result instanceof Exception) ? 1 : 0);
+				if (result instanceof Deferred) {
 					cb = new DeferredCommand() {
 
 						@Override
 						public <T> T execute(T result) {
-							self.resback(result);
-							self.paused--;
-							if (self.paused == 0 && self.fired >= 0) {
-								self.fire();
+							Deferred.this.resback(result);
+							Deferred.this.paused--;
+							if (Deferred.this.paused == 0
+									&& Deferred.this.fired >= 0) {
+								Deferred.this.fire();
 							}
 							return result;
 						}
@@ -138,13 +148,13 @@ public class Deferred {
 
 			} catch (Exception e) {
 				fired = 1;
-				res = e;
+				result = e;
 			}
 		}
 		this.fired = fired;
-		this.results[fired] = res;
+		this.results[fired] = result;
 		if ((cb != null) && this.paused != 0) {
-			((Deferred) res).addBoth(cb);
+			((Deferred) result).addBoth(cb);
 		}
 
 	}
@@ -153,16 +163,22 @@ public class Deferred {
 		Object execute(Deferred dfd);
 	}
 
-	public static class DeferredException extends Exception {
+	public static class DeferredExecutionException extends RuntimeException {
 		private static final long serialVersionUID = 0;
-		public Object cancelResult;
-		public String type;
+		public Object result;
 
-		public DeferredException(Object result, String type) {
+		public <T> DeferredExecutionException(T result) {
 			super("Deferred Cancelled" + result != null ? (": " + result) : "");
-			this.cancelResult = result;
-			this.type = type;
+			this.result = result;
 		}
 	}
 
+	public static class DeferredCancelledException extends
+			DeferredExecutionException {
+		private static final long serialVersionUID = 0;
+
+		public <T> DeferredCancelledException(T result) {
+			super(result);
+		}
+	}
 }

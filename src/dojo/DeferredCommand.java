@@ -2,6 +2,6 @@ package dojo;
 
 public interface DeferredCommand {
 
-	<T> T execute(T result);
+	<T> Object execute(T result);
 
 }

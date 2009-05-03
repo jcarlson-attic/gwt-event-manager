@@ -7,18 +7,7 @@
 
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>Gwteventmanager.html</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
   
-  <!-- Servlets -->
-  <servlet>
-    <servlet-name>greetServlet</servlet-name>
-    <servlet-class>com.playon.server.GreetingServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/gwteventmanager/greet</url-pattern>
-  </servlet-mapping>
-
 </web-app>

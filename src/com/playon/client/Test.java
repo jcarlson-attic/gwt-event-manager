@@ -9,8 +9,8 @@ public class Test implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.POST,
-				"http://localhost/oauth/authenticate?foo=bar");
-		rb.setRequestData("foo=bar&baz=qux");
+				"http://localhost/oauth/authenticate");
+		rb.setRequestData("username=jcarlson&password=playon");
 		rb.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		OAuth.signRequest(rb);

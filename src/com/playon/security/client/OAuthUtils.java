@@ -3,15 +3,13 @@ package com.playon.security.client;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.URL;
-
-import dojox.encoding.digests.SHA1;
+import com.playon.security.client.OAuthSignature.Parameter;
 
 final class OAuthUtils {
 
@@ -22,7 +20,7 @@ final class OAuthUtils {
 	}
 
 	protected static String generateBaseString(RequestBuilder builder,
-			OAuth.Signature sigBase) {
+			OAuthSignature sigBase) {
 		String method = builder.getHTTPMethod();
 		String url = builder.getUrl();
 		String content = builder.getRequestData();
@@ -31,15 +29,14 @@ final class OAuthUtils {
 		Set<String[]> paramSet = OAuthUtils.getParamSet(url, content,
 				contentType);
 
-		paramSet.add(new String[] { "oauth_consumer_key",
-				sigBase.oauth_consumer_key });
-		paramSet.add(new String[] { "oauth_token", sigBase.oauth_token });
-		paramSet.add(new String[] { "oauth_nonce", sigBase.oauth_nonce });
-		paramSet
-				.add(new String[] { "oauth_timestamp", sigBase.oauth_timestamp });
-		paramSet.add(new String[] { "oauth_signature_method",
-				sigBase.oauth_signature_method });
-		paramSet.add(new String[] { "oauth_version", sigBase.oauth_version });
+		for (Parameter param : OAuthSignature.Parameter.values()) {
+			String value = sigBase.getParameter(param);
+			if (value != null) {
+				paramSet.add(new String[] { param.toString(),
+						sigBase.getParameter(param) });
+			}
+
+		}
 
 		StringBuffer params = new StringBuffer();
 		for (Iterator<String[]> itr = paramSet.iterator(); itr.hasNext();) {
@@ -51,7 +48,8 @@ final class OAuthUtils {
 			}
 		}
 
-		return method.toUpperCase() + "&" + OAuthUtils.encode(OAuthUtils.normalizeUrl(url)) + "&"
+		return method.toUpperCase() + "&"
+				+ OAuthUtils.encode(OAuthUtils.normalizeUrl(url)) + "&"
 				+ OAuthUtils.encode(params.toString());
 	}
 
@@ -104,21 +102,6 @@ final class OAuthUtils {
 			String tokenSecret) {
 		return OAuthUtils.encode(consumerSecret) + "&"
 				+ OAuthUtils.encode(tokenSecret != null ? tokenSecret : "");
-	}
-
-	protected static String generateSignature(String baseString, String key,
-			String signatureMethod) {
-		if (signatureMethod != OAuth.HMAC_SHA1
-				&& signatureMethod != OAuth.PLAINTEXT) {
-			throw new IllegalArgumentException("Only " + OAuth.HMAC_SHA1
-					+ " and " + OAuth.PLAINTEXT
-					+ " signature methods are supported.");
-		}
-		if (signatureMethod == OAuth.PLAINTEXT) {
-			return key;
-		} else {
-			return SHA1.hmac(baseString, key);
-		}
 	}
 
 	protected static String encode(String s) {

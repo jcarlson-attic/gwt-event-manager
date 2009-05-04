@@ -9,6 +9,11 @@ public class SHA1 {
 
 	}
 
+	public static String sha1(String data) {
+		int[] wa = SHA1.core(SHA1.toWord(data), data.length() * SHA1.chrsz);
+		return SHA1.toBase64(wa);
+	}
+
 	public static String hmac(String data, String key) {
 		int[] wa = SHA1.toWord(key);
 
@@ -40,7 +45,7 @@ public class SHA1 {
 
 	private static int[] toWord(String key) {
 		int l = key.length() * SHA1.chrsz;
-		int[] wa = new int[(l >> 5) + 1];
+		int[] wa = new int[((l+64>>9)<<4)+16];
 
 		for (int i = 0; i < l; i += SHA1.chrsz) {
 			wa[i >> 5] |= (key.charAt(i / chrsz) & mask) << (32 - chrsz - i % 32);

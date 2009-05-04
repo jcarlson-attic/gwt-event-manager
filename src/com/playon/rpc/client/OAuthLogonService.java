@@ -61,7 +61,7 @@ public class OAuthLogonService implements LogonService {
 	private Deferred authorizeToken(final String username, final String password) {
 		// this deferred needs to return the requestToken it was called with
 		Deferred dfd = new Deferred();
-		dfd.addCallback(new DeferredCommand() {
+		dfd.addCallbacks(new DeferredCommand() {
 			@Override
 			public <T> Deferred execute(T rToken) {
 				Deferred http = new Deferred();
@@ -69,8 +69,15 @@ public class OAuthLogonService implements LogonService {
 				// Do HTTP request to authorize token
 				// Success/Error on HTTP request should invoke
 				// dfd.callback(rToken) or dfd.errback(error)
-
+				
+				http.callback(rToken);
 				return http;
+			}
+		}, new DeferredCommand() {
+			@Override
+			public <T> Object execute(T result) {
+				return new IllegalArgumentException(
+						"Invalid username or password");
 			}
 		});
 
@@ -80,7 +87,7 @@ public class OAuthLogonService implements LogonService {
 	private Deferred getAccessToken() {
 		// this deferred should return true when user is logged on
 		Deferred dfd = new Deferred();
-		dfd.addCallback(new DeferredCommand() {
+		dfd.addCallbacks(new DeferredCommand() {
 			@Override
 			public <T> Deferred execute(T rToken) {
 				Deferred http = new Deferred();
@@ -96,6 +103,12 @@ public class OAuthLogonService implements LogonService {
 				http.callback(Boolean.TRUE);
 
 				return http;
+			}
+		}, new DeferredCommand() {
+			@Override
+			public <T> Object execute(T result) {
+				return new RuntimeException(
+						"Unable to retrieve OAuth Access Token");
 			}
 		});
 

@@ -1,0 +1,5 @@
+<module>
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="com.playon.security.Security"/>
+	<entry-point class="com.playon.client.Test" />
+</module>

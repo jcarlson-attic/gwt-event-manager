@@ -40,7 +40,7 @@ public class SHA1 {
 
 	private static int[] toWord(String key) {
 		int l = key.length() * SHA1.chrsz;
-			int[] wa = new int[(l >> 5) + 1];
+		int[] wa = new int[(l >> 5) + 1];
 
 		for (int i = 0; i < l; i += SHA1.chrsz) {
 			wa[i >> 5] |= (key.charAt(i / chrsz) & mask) << (32 - chrsz - i % 32);
@@ -75,20 +75,18 @@ public class SHA1 {
 		x[((len + 64 >> 9) << 4) + 15] = len;
 
 		int[] w = new int[80];
-		int[] ret = new int[5];
-		ret[0] = 1732584193;
-		ret[1] = -271733879;
-		ret[2] = -1732584194;
-		ret[3] = 271733878;
-		ret[4] = -1009589776;
+		int a = 1732584193;
+		int b = -271733879;
+		int c = -1732584194;
+		int d = 271733878;
+		int e = -1009589776;
 
-		
 		for (int i = 0; i < x.length; i += 16) {
-			int olda = ret[0];
-			int oldb = ret[1];
-			int oldc = ret[2];
-			int oldd = ret[3];
-			int olde = ret[4];
+			int olda = a;
+			int oldb = b;
+			int oldc = c;
+			int oldd = d;
+			int olde = e;
 			for (int j = 0; j < 80; j++) {
 				if (j < 16) {
 					w[j] = x[i + j];
@@ -96,22 +94,22 @@ public class SHA1 {
 					w[j] = SHA1.r(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16],
 							1);
 				}
-				int t = SHA1.addWords(SHA1.addWords(SHA1.r(ret[0], 5), SHA1.ft(j, ret[1],
-						ret[2], ret[3])), SHA1.addWords(SHA1.addWords(ret[4], w[j]), SHA1
+				int t = SHA1.addWords(SHA1.addWords(SHA1.r(a, 5), SHA1.ft(j, b,
+						c, d)), SHA1.addWords(SHA1.addWords(e, w[j]), SHA1
 						.kt(j)));
-				ret[4] = ret[3];
-				ret[3] = ret[2];
-				ret[2] = SHA1.r(ret[1], 30);
-				ret[1] = ret[0];
-				ret[0] = t;
+				e = d;
+				d = c;
+				c = SHA1.r(b, 30);
+				b = a;
+				a = t;
 			}
-			ret[0] = SHA1.addWords(ret[0], olda);
-			ret[1] = SHA1.addWords(ret[1], oldb);
-			ret[2] = SHA1.addWords(ret[2], oldc);
-			ret[3] = SHA1.addWords(ret[3], oldd);
-			ret[4] = SHA1.addWords(ret[4], olde);
+			a = SHA1.addWords(a, olda);
+			b = SHA1.addWords(b, oldb);
+			c = SHA1.addWords(c, oldc);
+			d = SHA1.addWords(d, oldd);
+			e = SHA1.addWords(e, olde);
 		}
-		return ret;
+		return new int[] { a, b, c, d, e };
 	}
 
 	private static int addWords(int a, int b) {
@@ -126,9 +124,12 @@ public class SHA1 {
 		StringBuffer s = new StringBuffer();
 		int l = wa.length * 4;
 		for (int i = 0; i < l; i += 3) {
-			int t1 = i >> 2 < wa.length ? (((wa[i >> 2] >> 8 * (3 - i % 4)) & 0xFF) << 16) : 0;
-			int t2 = i + 1 >> 2 < wa.length ? (((wa[i + 1 >> 2] >> 8 * (3 - (i + 1) % 4)) & 0xFF) << 8) : 0;
-			int t3 = i + 2 >> 2 < wa.length ? ((wa[i + 2 >> 2] >> 8 * (3 - (i + 2) % 4)) & 0xFF) : 0;
+			int t1 = i >> 2 < wa.length ? (((wa[i >> 2] >> 8 * (3 - i % 4)) & 0xFF) << 16)
+					: 0;
+			int t2 = i + 1 >> 2 < wa.length ? (((wa[i + 1 >> 2] >> 8 * (3 - (i + 1) % 4)) & 0xFF) << 8)
+					: 0;
+			int t3 = i + 2 >> 2 < wa.length ? ((wa[i + 2 >> 2] >> 8 * (3 - (i + 2) % 4)) & 0xFF)
+					: 0;
 			int t = t1 | t2 | t3;
 			for (int j = 0; j < 4; j++) {
 				if (i * 8 + j * 6 > wa.length * 32) {

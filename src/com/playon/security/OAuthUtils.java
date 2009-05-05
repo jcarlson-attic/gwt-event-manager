@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.URL;
 import com.playon.security.OAuthSignature.Parameter;
+import com.playon.xhr.Request;
 
 final class OAuthUtils {
 
@@ -19,12 +19,12 @@ final class OAuthUtils {
 
 	}
 
-	protected static String generateBaseString(RequestBuilder builder,
+	protected static String generateBaseString(Request request,
 			OAuthSignature sigBase) {
-		String method = builder.getHTTPMethod();
-		String url = builder.getUrl();
-		String content = builder.getRequestData();
-		String contentType = builder.getHeader("Content-Type");
+		String method = request.method.toString();
+		String url = request.url;
+		String content = request.body;
+		String contentType = request.getHeader("Content-Type");
 
 		Set<String[]> paramSet = OAuthUtils.getParamSet(url, content,
 				contentType);

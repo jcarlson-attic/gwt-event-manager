@@ -1,19 +1,17 @@
 package com.playon;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.http.client.RequestBuilder;
-import com.playon.security.OAuth;
+import com.google.gwt.core.client.GWT;
+import com.playon.xhr.RequestBuilder;
 
 public class PlayON implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-		RequestBuilder rb = new RequestBuilder(RequestBuilder.POST,
-				"http://localhost/oauth/authenticate");
-		rb.setRequestData("username=jcarlson&password=playon");
-		rb.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-		OAuth.signRequest(rb);
+		
+		RequestBuilder rb = GWT.create(RequestBuilder.class);
+		
+		rb.setRequestData("foo=bar&baz=qux");
 	}
 
 }

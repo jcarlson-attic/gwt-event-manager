@@ -6,5 +6,5 @@
 	
 	<source path="playon" />
 	
-	<entry-point class="com.playon.Playon" />
+	<entry-point class="com.playon.PlayON" />
 </module>

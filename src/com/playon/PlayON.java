@@ -4,7 +4,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.RequestBuilder;
 import com.playon.security.OAuth;
 
-public class Playon implements EntryPoint {
+public class PlayON implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {

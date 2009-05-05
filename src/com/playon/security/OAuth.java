@@ -39,7 +39,7 @@ public class OAuth {
 				&& (request.method == Method.GET || request
 						.getHeader(Request.CONTENT_TYPE) != OAuthUtils.FORM_ENCODED)) {
 			signature.setParameter(Parameter.OAUTH_BODY_HASH, SHA1
-					.sha1(request.body));
+					.sha1(request.content));
 		}
 
 		OAuthSignatureMethod signer = OAuthSignatureMethod.getValue(signature

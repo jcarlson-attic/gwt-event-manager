@@ -23,7 +23,7 @@ final class OAuthUtils {
 			OAuthSignature sigBase) {
 		String method = request.method.toString();
 		String url = request.url;
-		String content = request.body;
+		String content = request.content;
 		String contentType = request.getHeader("Content-Type");
 
 		Set<String[]> paramSet = OAuthUtils.getParamSet(url, content,

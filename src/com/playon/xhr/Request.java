@@ -16,7 +16,7 @@ public class Request {
 	public Method method;
 	public String url;
 	public final List<Entry<String, String>> headers = new ArrayList<Entry<String, String>>();
-	public String body = null;
+	public String content = null;
 
 	public Request() {
 		this(null, null);
@@ -29,7 +29,7 @@ public class Request {
 	public Request(Method method, String url, String body) {
 		this.method = method;
 		this.url = url;
-		this.body = body;
+		this.content = body;
 	}
 
 	public String getHeader(String header) {

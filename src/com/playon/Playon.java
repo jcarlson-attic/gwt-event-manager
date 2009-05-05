@@ -1,10 +1,10 @@
-package com.playon.client;
+package com.playon;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.http.client.RequestBuilder;
-import com.playon.security.client.OAuth;
+import com.playon.security.OAuth;
 
-public class Test implements EntryPoint {
+public class Playon implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {

@@ -1,4 +1,4 @@
-package com.playon.security.client;
+package com.playon.security;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -9,7 +9,7 @@ import java.util.TreeSet;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.URL;
-import com.playon.security.client.OAuthSignature.Parameter;
+import com.playon.security.OAuthSignature.Parameter;
 
 final class OAuthUtils {
 

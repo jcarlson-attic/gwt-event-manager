@@ -1,8 +1,8 @@
-package com.playon.security.client;
+package com.playon.security;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.RequestBuilder;
-import com.playon.security.client.OAuthSignature.Parameter;
+import com.playon.security.OAuthSignature.Parameter;
 
 import dojox.encoding.digests.SHA1;
 

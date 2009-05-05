@@ -1,4 +1,4 @@
-package com.playon.rpc.client;
+package com.playon.rpc;
 
 import dojo.Deferred;
 

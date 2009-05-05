@@ -1,0 +1,10 @@
+<module>
+	<inherits name="com.google.gwt.user.User" />
+	
+	<inherits name="Dojo" />
+	<inherits name="Dojox" />
+	
+	<source path="playon" />
+	
+	<entry-point class="com.playon.Playon" />
+</module>

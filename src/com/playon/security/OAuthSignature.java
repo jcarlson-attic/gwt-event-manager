@@ -1,4 +1,4 @@
-package com.playon.security.client;
+package com.playon.security;
 
 import java.util.HashMap;
 import java.util.Map;

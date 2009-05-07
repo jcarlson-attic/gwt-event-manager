@@ -1,9 +1,18 @@
 package com.playon.model;
 
-public interface Participant {
+import com.google.gwt.core.client.JavaScriptObject;
 
-	Boolean isHost();
+public class Participant extends JavaScriptObject {
 
-	Organization getOrganization();
+	protected Participant() {
+	}
+
+	public final native Organization getOrganization() /*-{
+		return this.organization;
+	}-*/;
+
+	public final native Boolean isHost() /*-{
+		return this.host;
+	}-*/;
 
 }

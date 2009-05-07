@@ -1,11 +1,26 @@
 package com.playon.model;
 
-public interface Venue extends HasName {
+import com.google.gwt.core.client.JavaScriptObject;
 
-	String getCity();
+public class Venue extends JavaScriptObject {
 
-	String getState();
+	protected Venue() {
+	}
 
-	String getCountry();
+	public final native String getName() /*-{
+		return this.city;
+	}-*/;
+
+	public final native String getCity() /*-{
+		return this.city;
+	}-*/;
+
+	public final native String getState() /*-{
+		return this.state;
+	}-*/;
+
+	public final native String getCountry() /*-{
+		return this.country;
+	}-*/;
 
 }

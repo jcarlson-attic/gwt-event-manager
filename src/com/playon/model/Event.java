@@ -1,34 +1,62 @@
 package com.playon.model;
 
-import java.util.Date;
-import java.util.List;
+import com.google.gwt.core.client.JsArray;
 
-public interface Event extends HasIdentity, HasId, HasName {
+public class Event extends HasNameAndId {
 
-	Broadcast getBroadcast();
+	protected Event() {
+	}
 
-	Video getHighlight();
+	public final native Activity getActivity() /*-{
+		return this.activity;
+	}-*/;
 
-	String getDescription();
+	public final native Broadcast getBroadcast() /*-{
+		return this.broadcast;
+	}-*/;
 
-	Venue getVenue();
+	public final native String getDescription() /*-{
+		return this.description;
+	}-*/;
 
-	Boolean isPublished();
+	public final native EventAvailability getEventAvailability() /*-{
+		return this.availability;
+	}-*/;
 
-	EventAvailability getEventAvailability();
+	public final native EventState getEventState() /*-{
+		return this.state;
+	}-*/;
 
-	EventState getEventState();
+	public final native Video getHighlight() /*-{
+		return this.highlight;
+	}-*/;
 
-	Video getVideo();
+	public final native JsArray<Participant> getParticipants() /*-{
+		return this.participants;
+	}-*/;
 
-	List<Participant> getParticipants();
+	public final native Publisher getPublisher() /*-{
+		return this.publisher;
+	}-*/;
 
-	Date getScheduledDate();
+	public final native String getScheduledDate() /*-{
+		return this.scheduledDate;
+	}-*/;
 
-	String getURL();
+	public final native String getURL() /*-{
+		return this.url;
+	}-*/;
 
-	Publisher getPublisher();
+	public final native Venue getVenue() /*-{
+		return this.venue;
+	}-*/;
 
-	Activity getActivity();
+	public final native Video getVideo() /*-{
+		return this.video;
+	}-*/;
+
+	public final native Boolean isPublished() /*-{
+		return this.published;
+	}-*/;
 
 }

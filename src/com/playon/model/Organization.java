@@ -1,9 +1,16 @@
 package com.playon.model;
 
-public interface Organization extends HasIdentity, HasId, HasName {
+public class Organization extends HasNameAndId {
 
-	String getShortName();
+	protected Organization() {
+	}
 
-	String getNickname();
+	public final native String getNickname() /*-{
+		return this.nickname;
+	}-*/;
+
+	public final native String getShortName() /*-{
+		return this.shortName;
+	}-*/;
 
 }

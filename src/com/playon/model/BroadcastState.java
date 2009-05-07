@@ -1,6 +1,6 @@
 package com.playon.model;
 
-public interface BroadcastState extends HasIdentity {
+public class BroadcastState extends HasIdentity {
 
 	public enum Code {
 		UNPROVISIONED, PROVISIONED, STREAMING, AIRING;
@@ -13,6 +13,15 @@ public interface BroadcastState extends HasIdentity {
 		}
 	}
 
-	Code getCode();
+	protected BroadcastState() {
+	}
+
+	public final Code getCode() {
+		return Code.getCode(this.getCodeString());
+	}
+
+	private native String getCodeString() /*-{
+		return this.code;
+	}-*/;
 
 }

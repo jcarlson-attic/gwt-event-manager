@@ -1,11 +1,17 @@
 package com.playon.model;
 
-import java.util.List;
+import com.google.gwt.core.client.JsArray;
 
-public interface Publisher extends HasIdentity, HasId, HasName {
+public class Publisher extends HasNameAndId {
 
-	List<Activity> getActivities();
+	protected Publisher() {
+	}
 
-	List<Organization> getOrganizations();
+	public final native JsArray<Activity> getActivities() /*-{
+		return this.activities;
+	}-*/;
 
+	public final native JsArray<Organization> getOrganizations() /*-{
+		return this.organizations;
+	}-*/;
 }

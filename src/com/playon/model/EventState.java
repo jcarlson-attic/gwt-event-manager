@@ -1,6 +1,6 @@
 package com.playon.model;
 
-public interface EventState extends HasIdentity {
+public class EventState extends HasIdentity {
 
 	public enum Code {
 		SCHEDULED("scheduled"), IN_PRODUCTION("inprod"), COMPLETE("complete"), CANCELLED(
@@ -22,6 +22,15 @@ public interface EventState extends HasIdentity {
 		}
 	}
 
-	Code getCode();
+	protected EventState() {
+	}
+
+	public final Code getCode() {
+		return Code.getCode(this.getCodeString());
+	}
+
+	private final native String getCodeString() /*-{
+		return this.code;
+	}-*/;
 
 }

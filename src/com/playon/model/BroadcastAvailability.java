@@ -1,6 +1,8 @@
 package com.playon.model;
 
-public interface BroadcastAvailability {
+import com.google.gwt.core.client.JavaScriptObject;
+
+public class BroadcastAvailability extends JavaScriptObject {
 
 	public enum Code {
 		LIVE_VOD("live+vod"), LIVE("live"), VOD("vod");
@@ -21,6 +23,15 @@ public interface BroadcastAvailability {
 		}
 	}
 
-	Code getCode();
+	protected BroadcastAvailability() {
+	}
+
+	public final Code getCode() {
+		return Code.getCode(this.getCodeString());
+	}
+
+	private native String getCodeString() /*-{
+		return this.code;
+	}-*/;
 
 }

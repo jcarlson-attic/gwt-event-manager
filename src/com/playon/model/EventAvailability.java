@@ -1,6 +1,6 @@
 package com.playon.model;
 
-public interface EventAvailability extends HasIdentity {
+public class EventAvailability extends HasIdentity {
 
 	public enum Code {
 		AVAILABLE, INTERRUPTED, DELAYED;
@@ -13,8 +13,19 @@ public interface EventAvailability extends HasIdentity {
 		}
 	}
 
-	Code getCode();
+	protected EventAvailability() {
+	}
 
-	String getMessage();
+	public final Code getCode() {
+		return Code.getCode(this.getCodeString());
+	}
+
+	private native String getCodeString() /*-{
+		return this.code;
+	}-*/;
+
+	public final native String getMessage() /*-{
+		return this.message;
+	}-*/;
 
 }

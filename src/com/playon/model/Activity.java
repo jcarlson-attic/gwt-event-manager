@@ -1,9 +1,14 @@
 package com.playon.model;
 
-import java.util.Set;
+import com.google.gwt.core.client.JsArrayString;
 
-public interface Activity extends HasIdentity, HasId, HasName {
+public class Activity extends HasNameAndId {
 
-	Set<String> getTags();
+	protected Activity() {
+	}
+
+	public final native JsArrayString getTags() /*-{
+		return this.tags;
+	}-*/;
 
 }

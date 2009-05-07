@@ -1,7 +1,12 @@
 package com.playon.model;
 
-public interface Video extends HasIdentity {
+public class Video extends HasIdentity {
 
-	String getURL();
+	protected Video() {
+	}
+
+	public final native String getURL() /*-{
+		return this.url;
+	}-*/;
 
 }

@@ -6,6 +6,9 @@ import com.playon.model.HasName;
 public abstract class HasNameAndIdImpl extends HasIdentityImpl implements
 		HasName, HasId {
 
+	protected HasNameAndIdImpl() {
+	}
+
 	@Override
 	public final native String getName() /*-{
 		return this.name;

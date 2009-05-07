@@ -6,6 +6,9 @@ import com.playon.model.BroadcastAvailability;
 public class BroadcastAvailabilityImpl extends JavaScriptObject implements
 		BroadcastAvailability {
 
+	protected BroadcastAvailabilityImpl() {
+	}
+
 	@Override
 	public Code getCode() {
 		return Code.getCode(this.getCodeString());

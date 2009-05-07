@@ -6,6 +6,9 @@ import com.playon.model.HasIdentity;
 public abstract class HasIdentityImpl extends JavaScriptObject implements
 		HasIdentity {
 
+	protected HasIdentityImpl() {
+	}
+
 	@Override
 	public final native String getURI() /*-{
 		if (!this.uri && this.$ref) {

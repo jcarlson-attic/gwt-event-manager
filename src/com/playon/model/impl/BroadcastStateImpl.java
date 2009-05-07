@@ -5,6 +5,9 @@ import com.playon.model.BroadcastState;
 public class BroadcastStateImpl extends HasIdentityImpl implements
 		BroadcastState {
 
+	protected BroadcastStateImpl() {
+	}
+
 	@Override
 	public Code getCode() {
 		return Code.getCode(this.getCodeString());

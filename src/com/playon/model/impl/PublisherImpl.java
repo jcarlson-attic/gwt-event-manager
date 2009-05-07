@@ -8,6 +8,9 @@ import com.playon.model.Publisher;
 
 public class PublisherImpl extends HasNameAndIdImpl implements Publisher {
 
+	protected PublisherImpl() {
+	}
+
 	@Override
 	public final native List<Activity> getActivities() /*-{
 		return this.activities;

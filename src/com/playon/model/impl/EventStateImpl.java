@@ -4,6 +4,9 @@ import com.playon.model.EventState;
 
 public class EventStateImpl extends HasIdentityImpl implements EventState {
 
+	protected EventStateImpl() {
+	}
+
 	@Override
 	public Code getCode() {
 		return Code.getCode(this.getCodeString());

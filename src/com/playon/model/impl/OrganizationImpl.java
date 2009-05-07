@@ -4,6 +4,9 @@ import com.playon.model.Organization;
 
 public class OrganizationImpl extends HasNameAndIdImpl implements Organization {
 
+	protected OrganizationImpl() {
+	}
+
 	@Override
 	public final native String getNickname() /*-{
 		return this.nickname;

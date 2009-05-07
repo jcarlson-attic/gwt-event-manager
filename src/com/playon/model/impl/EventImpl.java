@@ -15,6 +15,9 @@ import com.playon.model.Video;
 
 public class EventImpl extends HasNameAndIdImpl implements Event {
 
+	protected EventImpl() {
+	}
+
 	@Override
 	public final native Activity getActivity() /*-{
 		return this.activity;

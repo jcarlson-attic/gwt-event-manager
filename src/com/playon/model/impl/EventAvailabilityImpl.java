@@ -5,6 +5,9 @@ import com.playon.model.EventAvailability;
 public class EventAvailabilityImpl extends HasIdentityImpl implements
 		EventAvailability {
 
+	protected EventAvailabilityImpl() {
+	}
+
 	@Override
 	public Code getCode() {
 		return Code.getCode(this.getCodeString());

@@ -1,9 +1,7 @@
 package com.playon.xhr;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Request {
 
@@ -15,33 +13,25 @@ public class Request {
 
 	public Method method;
 	public String url;
-	public final List<Entry<String, String>> headers = new ArrayList<Entry<String, String>>();
+	public Map<String, String> headers = new HashMap<String, String>();
+	public Map<String, String> params = new HashMap<String, String>();
 	public String content = null;
 
-	public Request() {
-		this(null, null);
-	}
-
 	public Request(Method method, String url) {
-		this(method, url, null);
-	}
-
-	public Request(Method method, String url, String body) {
 		this.method = method;
 		this.url = url;
-		this.content = body;
 	}
 
 	public String getHeader(String header) {
-		String value = null;
-		Iterator<Entry<String, String>> itr = headers.iterator();
-		while (itr.hasNext()) {
-			Entry<String, String> entry = itr.next();
-			if (header.equalsIgnoreCase(entry.getKey())) {
-				value = entry.getValue();
-			}
-		}
-		return value;
+		return headers.get(header);
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public void setParams(Map<String, String> params) {
+		this.params = params;
 	}
 
 }

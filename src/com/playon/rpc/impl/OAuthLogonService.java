@@ -1,4 +1,6 @@
-package com.playon.rpc;
+package com.playon.rpc.impl;
+
+import com.playon.rpc.LogonService;
 
 import dojo.Deferred;
 import dojo.DeferredCommand;
@@ -63,14 +65,14 @@ public class OAuthLogonService implements LogonService {
 		Deferred dfd = new Deferred();
 		dfd.addCallbacks(new DeferredCommand() {
 			@Override
-			public <T> Deferred execute(T rToken) {
+			public <T> Deferred execute(T reqToken) {
 				Deferred http = new Deferred();
 
 				// Do HTTP request to authorize token
 				// Success/Error on HTTP request should invoke
-				// dfd.callback(rToken) or dfd.errback(error)
-				
-				http.callback(rToken);
+				// dfd.callback(reqToken) or dfd.errback(error)
+
+				http.callback(reqToken);
 				return http;
 			}
 		}, new DeferredCommand() {
@@ -89,7 +91,7 @@ public class OAuthLogonService implements LogonService {
 		Deferred dfd = new Deferred();
 		dfd.addCallbacks(new DeferredCommand() {
 			@Override
-			public <T> Deferred execute(T rToken) {
+			public <T> Deferred execute(T reqToken) {
 				Deferred http = new Deferred();
 
 				// Do HTTP request to authorize token
@@ -100,7 +102,7 @@ public class OAuthLogonService implements LogonService {
 				Object aToken = OAuthLogonService.this.processToken(rawToken);
 				OAuthLogonService.this.persistCredentials(aToken);
 
-				http.callback(Boolean.TRUE);
+				http.callback(true);
 
 				return http;
 			}

@@ -55,8 +55,8 @@ public class Event extends HasNameAndId {
 		return this.video;
 	}-*/;
 
-	public final native Boolean isPublished() /*-{
-		return this.published;
+	public final native boolean isPublished() /*-{
+		return this.published === true;
 	}-*/;
 
 }

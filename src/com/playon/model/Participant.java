@@ -11,8 +11,8 @@ public class Participant extends JavaScriptObject {
 		return this.organization;
 	}-*/;
 
-	public final native Boolean isHost() /*-{
-		return this.host;
+	public final native boolean isHost() /*-{
+		return this.host === true;
 	}-*/;
 
 }

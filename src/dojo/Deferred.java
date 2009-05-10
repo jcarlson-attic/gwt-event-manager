@@ -29,18 +29,20 @@ public class Deferred {
 		this.canceller = canceller;
 	}
 
+	public void setCanceller(Canceller canceller) {
+		this.canceller = canceller;
+	}
+
 	public void cancel() {
-		Object err = null;
+		Throwable err = null;
 		if (this.fired == -1) {
 			if (this.canceller != null) {
 				err = this.canceller.execute(this);
 			} else {
 				this.silentlyCancelled = true;
+				err = new DeferredCancelledException();
 			}
 			if (this.fired == -1) {
-				if (!(err instanceof Exception)) {
-					err = new DeferredCancelledException(err);
-				}
 				this.errback(err);
 			}
 		} else if ((this.fired == 0) && (this.results[0] instanceof Deferred)) {
@@ -160,7 +162,7 @@ public class Deferred {
 	}
 
 	public static interface Canceller {
-		Object execute(Deferred dfd);
+		Exception execute(Deferred dfd);
 	}
 
 	public static class DeferredExecutionException extends RuntimeException {
@@ -173,12 +175,11 @@ public class Deferred {
 		}
 	}
 
-	public static class DeferredCancelledException extends
-			DeferredExecutionException {
+	public static class DeferredCancelledException extends RuntimeException {
 		private static final long serialVersionUID = 0;
 
-		public <T> DeferredCancelledException(T result) {
-			super(result);
+		public DeferredCancelledException() {
+			super("Deferred has been cancelled");
 		}
 	}
 }

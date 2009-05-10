@@ -2,30 +2,67 @@ package com.playon;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.playon.model.Broadcast;
-import com.playon.model.BroadcastState;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNull;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 public class PlayON implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
 
-		Broadcast b = getJSO();
+		// Service returns JavaScriptObjects to Store
+		JavaScriptObject obj = getObject();
 
-		BroadcastState bs = b.getBroadcastState();
+		// Client requests the "foo" attribute of item
+		JSONObject json = new JSONObject(obj);
+		JSONValue value = json.get("qux");
 
-		GWT.log(bs.getCode().toString(), null);
+		JSONObject object = value.isObject();
+		if (object != null) {
+			log("Object", object);
+		}
+		JSONArray array = value.isArray();
+		if (array != null) {
+			JsArray<JavaScriptObject> jsa = array.getJavaScriptObject().cast();
+			log("Array", jsa);
+		}
+		JSONBoolean bool = value.isBoolean();
+		if (bool != null) {
+			log("Boolean", bool);
+		}
+		JSONNumber number = value.isNumber();
+		if (number != null) {
+			log("Number", number);
+		}
+		JSONString string = value.isString();
+		if (string != null) {
+			log("String", string);
+		}
+		JSONNull nil = value.isNull();
+		if (nil != null) {
+			log("Null", nil);
+		}
 
 	}
 
-	native Broadcast getJSO() /*-{
+	<T> void log(String type, T value) {
+		GWT.log(type + ": " + value.toString(), null);
+	}
+
+	native JavaScriptObject getObject() /*-{
 		return {
-			state: {
-				uri: "/foo/1/bar/baz",
-				code: "unprovisioned"
-			},
-			availability: {
-				code: "available"
+			foo: "bar",
+			baz: ["a", "b", "c"],
+			qux: 12345,
+			etc: {
+				blah: "whatev"
 			}
 		};
 	}-*/;

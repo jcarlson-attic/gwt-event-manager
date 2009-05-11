@@ -14,7 +14,6 @@ public class Request {
 	public Method method;
 	public String url;
 	public Map<String, String> headers = new HashMap<String, String>();
-	public Map<String, String> params = new HashMap<String, String>();
 	public String content = null;
 
 	public Request(Method method, String url) {
@@ -22,16 +21,13 @@ public class Request {
 		this.url = url;
 	}
 
+	// TODO: Support multiple headers of same name
 	public String getHeader(String header) {
 		return headers.get(header);
 	}
 
 	public void setContent(String content) {
 		this.content = content;
-	}
-
-	public void setParams(Map<String, String> params) {
-		this.params = params;
 	}
 
 }

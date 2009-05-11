@@ -5,7 +5,11 @@ import java.util.Map;
 
 public class OAuthSignature {
 
-	public static enum Parameter {
+	public static enum OAuthSignatureLocation {
+		HEADER, QUERYSTRING, BODY
+	}
+
+	public static enum OAuthParameter {
 		OAUTH_BODY_HASH, OAUTH_CONSUMER_KEY, OAUTH_NONCE, OAUTH_SIGNATURE, OAUTH_SIGNATURE_METHOD, OAUTH_TIMESTAMP, OAUTH_TOKEN, OAUTH_VERSION;
 
 		@Override
@@ -15,33 +19,27 @@ public class OAuthSignature {
 
 	}
 
-	private Map<Parameter, String> params;
+	private Map<OAuthParameter, String> params;
 
-	public OAuthSignature(String consumerKey, String token,
-			String signatureMethod) {
-		this.params = new HashMap<Parameter, String>();
-		this.setParameter(Parameter.OAUTH_NONCE, OAuthUtils.nonce(16));
-		this.setParameter(Parameter.OAUTH_TIMESTAMP, OAuthUtils.timestamp());
-		this.setParameter(Parameter.OAUTH_VERSION, "1.0");
-		this.setParameter(Parameter.OAUTH_SIGNATURE_METHOD, signatureMethod);
+	public OAuthSignature(OAuthParams params) {
+		this.params = new HashMap<OAuthParameter, String>();
+		this.setParameter(OAuthParameter.OAUTH_NONCE, params.nonce);
+		this.setParameter(OAuthParameter.OAUTH_TIMESTAMP, params.timestamp);
+		this.setParameter(OAuthParameter.OAUTH_VERSION, params.version);
+		this.setParameter(OAuthParameter.OAUTH_SIGNATURE_METHOD,
+				params.signatureMethod.toString());
 
-		this.setParameter(Parameter.OAUTH_CONSUMER_KEY, consumerKey);
-		this.setParameter(Parameter.OAUTH_TOKEN, token);
+		this
+				.setParameter(OAuthParameter.OAUTH_CONSUMER_KEY,
+						params.consumerKey);
+		this.setParameter(OAuthParameter.OAUTH_TOKEN, params.token);
 	}
 
-	// TODO: Remove!
-	public OAuthSignature(String consumerKey, String token,
-			String signatureMethod, String nonce, String timestamp) {
-		this(consumerKey, token, signatureMethod);
-		this.setParameter(Parameter.OAUTH_NONCE, nonce);
-		this.setParameter(Parameter.OAUTH_TIMESTAMP, timestamp);
-	}
-
-	public void setParameter(Parameter param, String value) {
+	public void setParameter(OAuthParameter param, String value) {
 		this.params.put(param, value);
 	}
 
-	public String getParameter(Parameter param) {
+	public String getParameter(OAuthParameter param) {
 		return this.params.get(param);
 	}
 

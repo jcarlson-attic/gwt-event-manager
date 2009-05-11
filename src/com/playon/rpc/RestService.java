@@ -8,7 +8,6 @@ import dojo.Deferred;
 
 public interface RestService {
 
-	// TODO: Support multiple params of same name
 	Deferred get(String uri, Map<String, String> params);
 
 	Deferred post(HasIdentity item);
@@ -19,7 +18,6 @@ public interface RestService {
 
 	Deferred put(String uri, HasIdentity item);
 
-	// TODO: Support multiple params of same name
 	Deferred delete(String uri, Map<String, String> params);
 
 }

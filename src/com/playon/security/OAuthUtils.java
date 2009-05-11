@@ -8,7 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.google.gwt.http.client.URL;
-import com.playon.security.OAuthSignature.Parameter;
+import com.playon.security.OAuthSignature.OAuthParameter;
 import com.playon.xhr.Request;
 
 final class OAuthUtils {
@@ -29,7 +29,7 @@ final class OAuthUtils {
 		Set<String[]> paramSet = OAuthUtils.getParamSet(url, content,
 				contentType);
 
-		for (Parameter param : OAuthSignature.Parameter.values()) {
+		for (OAuthParameter param : OAuthSignature.OAuthParameter.values()) {
 			String value = sigBase.getParameter(param);
 			if (value != null) {
 				paramSet.add(new String[] { param.toString(),
@@ -73,7 +73,8 @@ final class OAuthUtils {
 
 		// If contentType is application/x-www-form-urlencoded and content is
 		// not empty, extract those params
-		if (contentType.toLowerCase().equals(OAuthUtils.FORM_ENCODED)
+		if (contentType != null
+				&& contentType.toLowerCase().equals(OAuthUtils.FORM_ENCODED)
 				&& content != null && !content.equals("")) {
 			String[] kvPairs = content.split("&");
 			for (String kvPair : kvPairs) {

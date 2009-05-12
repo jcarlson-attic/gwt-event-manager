@@ -1,22 +1,25 @@
 package com.playon;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 
 public class Application {
 
-	private static AppConfigDefaults defaults = GWT
-			.create(AppConfigDefaults.class);
+	public static final Config config = GWT.create(Config.class);
 
-	private static Map<String, String> config = defaults.config();
+	private static final Map<String, String> params = new HashMap<String, String>();
+
+	private Application() {
+	}
 
 	public static String getParam(String param) {
-		return config.get(param);
+		return params.get(param);
 	}
 
 	public static void setParam(String param, String value) {
-		config.put(param, value);
+		params.put(param, value);
 	}
 
 }

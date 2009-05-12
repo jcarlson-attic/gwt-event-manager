@@ -10,8 +10,8 @@ public class OAuthSignedJSONRestService extends JSONRestService {
 
 	@Override
 	protected Deferred sendRequest(Request request) {
-		String webservices = Application.getParam("webservices");
-		String proxy = Application.getParam("proxy");
+		String webservices = Application.config.webservices();
+		String proxy = Application.config.proxy();
 
 		if (request.url.startsWith(proxy)) {
 			request.url = webservices + request.url.substring(proxy.length());

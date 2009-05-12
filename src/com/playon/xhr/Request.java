@@ -11,6 +11,8 @@ public class Request {
 	public static final String CONTENT_TYPE = "Content-Type";
 	public static final String DEFAULT_CHARSET = "ISO-8859-1";
 
+	public static final String FORM_ENCODED = "application/x-www-form-urlencoded";
+
 	public Method method;
 	public String url;
 	public Map<String, String> headers = new HashMap<String, String>();

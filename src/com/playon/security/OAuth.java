@@ -42,7 +42,13 @@ public class OAuth {
 		GWT.log(sig, null);
 		signature.setParameter(OAuthParameter.OAUTH_SIGNATURE, sig);
 
-		OAuth.attachToHeader(request, signature);
+		switch (params.signatureLocation) {
+		case QUERYSTRING:
+			OAuth.attachToQuery(request, signature);
+			break;
+		default:
+			OAuth.attachToHeader(request, signature);
+		}
 
 	}
 
@@ -54,16 +60,35 @@ public class OAuth {
 		for (OAuthParameter p : OAuthParameter.values()) {
 			String value = signature.getParameter(p);
 			if (value != null) {
+				if (i > 1) {
+					sb.append(", ");
+				}
 				sb.append(p.toString()).append("=").append('"').append(
 						OAuthUtils.encode(value)).append('"');
-				if (i < OAuthParameter.values().length) {
-					sb.append(", ");
-					i++;
-				}
+				i++;
 			}
 		}
 		String authorization = sb.toString();
 		GWT.log(authorization, null);
 		request.headers.put("Authorization", authorization);
+	}
+
+	protected static void attachToQuery(Request request,
+			OAuthSignature signature) {
+		StringBuilder sb = new StringBuilder();
+		int i = 1;
+		for (OAuthParameter p : OAuthParameter.values()) {
+			String value = signature.getParameter(p);
+			if (value != null) {
+				if (i > 1) {
+					sb.append("&");
+				}
+				sb.append(p.toString()).append("=").append(
+						OAuthUtils.encode(value));
+				i++;
+			}
+		}
+		request.url += request.url.indexOf("?") > 0 ? "&" : "?";
+		request.url += sb.toString();
 	}
 }

@@ -2,7 +2,8 @@ package com.playon;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.playon.security.OAuthSignedJSONRestService;
+import com.playon.rpc.LogonService;
+import com.playon.rpc.impl.OAuthLogonService;
 
 import dojo.Deferred;
 import dojo.DeferredCommand;
@@ -12,25 +13,19 @@ public class PlayON implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 
-		OAuthSignedJSONRestService svc = new OAuthSignedJSONRestService();
-		svc.setEndpoint(Application.getParam("proxy"));
-
-		Deferred dfd = svc.get("/oauth/request_token", null);
-
-		dfd.addCallbacks(new DeferredCommand() {
+		LogonService svc = new OAuthLogonService();
+		Deferred dfd = svc.logon("jcarlson", "playonsports");
+		dfd.addBoth(new DeferredCommand() {
 			@Override
 			public <T> T execute(T results) {
-				GWT.log("Success! " + (String) results, null);
-				return results;
-			}
-		}, new DeferredCommand() {
-			@Override
-			public <T> T execute(T results) {
-				GWT.log("Crap!", (Exception) results);
+				if (results instanceof Exception) {
+					GWT.log("Doh!", (Exception) results);
+				} else {
+					GWT.log(results.toString(), null);
+				}
 				return results;
 			}
 		});
-
 	}
 
 }

@@ -5,9 +5,8 @@ import com.playon.security.OAuthSignature.OAuthSignatureLocation;
 
 public class OAuthParams {
 
-	public String consumerKey = Application.getParam("oauth_consumer_key");
-	public String consumerSecret = Application
-			.getParam("oauth_consumer_secret");
+	public String consumerKey = Application.config.oauth_consumer_key();
+	public String consumerSecret = Application.config.oauth_consumer_secret();
 
 	public String token = Application.getParam("oauth_token");
 	public String tokenSecret = Application.getParam("oauth_token_secret");

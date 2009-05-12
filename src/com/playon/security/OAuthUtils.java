@@ -67,7 +67,9 @@ final class OAuthUtils {
 			String[] kvPairs = qs.split("&");
 			for (String kvPair : kvPairs) {
 				String[] kv = kvPair.split("=");
-				params.add(kv);
+				String k = URL.decodeComponent(kv[0]);
+				String v = URL.decodeComponent(kv[1]);
+				params.add(new String[] { k, v });
 			}
 		}
 
@@ -79,7 +81,9 @@ final class OAuthUtils {
 			String[] kvPairs = content.split("&");
 			for (String kvPair : kvPairs) {
 				String[] kv = kvPair.split("=");
-				params.add(kv);
+				String k = URL.decodeComponent(kv[0]);
+				String v = URL.decodeComponent(kv[1]);
+				params.add(new String[] { k, v });
 			}
 		}
 

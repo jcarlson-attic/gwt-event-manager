@@ -19,7 +19,7 @@ public interface Read {
 
 	boolean isItemLoaded(Item item);
 
-	void loadItem(Item item, LoadItemCallback callback);
+	void loadItem(LoadItemCallback callback);
 
 	Deferred fetch(Request args);
 
@@ -30,6 +30,8 @@ public interface Read {
 	String[] getLabelAttributes(Item item);
 
 	public interface LoadItemCallback {
+
+		Item item();
 
 		void onItem(Item item);
 

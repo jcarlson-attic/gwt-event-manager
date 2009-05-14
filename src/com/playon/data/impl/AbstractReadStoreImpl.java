@@ -1,9 +1,14 @@
 package com.playon.data.impl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 
 import dojo.Deferred;
 import dojo.DeferredCommand;
@@ -15,9 +20,26 @@ import dojo.data.api.Request.FetchCallback;
 
 public abstract class AbstractReadStoreImpl implements Store, Read {
 
+	public static final String LABEL_ATTRIBUTES = "labelAttributes";
+
+	private static final String NAME_ATTR = "name";
+
+	protected List<ReadItem> items = new ArrayList<ReadItem>();
+	private String[] labelAttributes = new String[] { NAME_ATTR };
+
+	public AbstractReadStoreImpl() {
+	}
+
+	public AbstractReadStoreImpl(Map<String, Object> options) {
+		this();
+		if (options.containsKey(LABEL_ATTRIBUTES)) {
+			this.labelAttributes = (String[]) options.get(LABEL_ATTRIBUTES);
+		}
+	}
+
 	@Override
 	public <T> T getValue(Item item, String attribute, T defaultValue) {
-		JsonItem itm = this.assertItem(item);
+		ReadItem itm = this.assertItem(item);
 
 		if (!this.hasAttribute(itm, attribute)) {
 			return defaultValue;
@@ -36,16 +58,25 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 
 	@Override
 	public String[] getAttributes(Item item) {
-		JsonItem itm = this.assertItem(item);
-		Set<String> keys = itm.datum.keySet();
-		String[] k = new String[keys.size()];
-		return keys.toArray(k);
+		ReadItem itm = this.assertItem(item);
+		JSONObject obj = itm.datum.isObject();
+		if (obj != null) {
+			Set<String> keys = obj.keySet();
+			String[] k = new String[keys.size()];
+			return keys.toArray(k);
+
+		}
+		return new String[0];
 	}
 
 	@Override
 	public boolean hasAttribute(Item item, String attribute) {
-		JsonItem itm = this.assertItem(item);
-		return itm.datum.containsKey(attribute);
+		ReadItem itm = this.assertItem(item);
+		JSONObject obj = itm.datum.isObject();
+		if (obj != null) {
+			return obj.containsKey(attribute);
+		}
+		return false;
 	}
 
 	@Override
@@ -61,33 +92,32 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 	}
 
 	@Override
-	public boolean isItem(Object item) {
-		return item instanceof JsonItem && ((JsonItem) item).store == this;
+	public boolean isItem(Object object) {
+		if (!(object instanceof ReadItem)) {
+			return false;
+		}
+
+		ReadItem item = (ReadItem) object;
+
+		if (item.store != this) {
+			return false;
+		}
+
+		ReadItem inItems = (ReadItem) this.items.get(item.index);
+		if (inItems.datum != item.datum) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	public boolean isItemLoaded(Item item) {
-		return this.isItem(item) && ((JsonItem) item).loader == null;
+		return this.isItem(item);
 	}
 
 	@Override
-	public void loadItem(Item item, final LoadItemCallback callback) {
-		if (!this.isItemLoaded(item)) {
-			Deferred dfd = ((JsonItem) item).loaded;
-			dfd.addCallbacks(new DeferredCommand() {
-				@Override
-				public <T> T execute(T result) {
-					callback.onItem((Item) result);
-					return result;
-				}
-			}, new DeferredCommand() {
-				@Override
-				public <T> T execute(T result) {
-					callback.onError((Exception) result);
-					return result;
-				}
-			});
-		}
+	public void loadItem(final LoadItemCallback callback) {
+		// no-op
 	}
 
 	@Override
@@ -97,19 +127,13 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 		dfd.addCallbacks(new DeferredCommand() {
 
 			@Override
-			public <T> Item[] execute(T results) {
+			public <T> List<Item> execute(T results) {
 				FetchCallback cb = args.fetchCallback();
 
-				// TODO: How do we get the raw items?
-				Object[] rawItems = new Object[0];
+				List<Item> items = AbstractReadStoreImpl.this.processRawItems(
+						args, (List<JSONObject>) results);
 
-				cb.onBegin(rawItems.length, args);
-
-				Item[] items = new Item[rawItems.length];
-				for (int i = 0; i < rawItems.length; i++) {
-					items[i] = AbstractReadStoreImpl.this
-							.ingestItem(rawItems[i]);
-				}
+				cb.onBegin(items.size(), args);
 
 				// TODO: Sort
 
@@ -138,58 +162,76 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 
 	@Override
 	public void close() {
-		// TODO: Empty the index
+		this.items.clear();
 	}
 
 	@Override
 	public String getLabel(Item item) {
-		StringBuilder sb = new StringBuilder();
-		String[] attributes = this.getLabelAttributes(item);
-		for (String attribute : attributes) {
-			sb.append(this.getValue(item, attribute, ""));
-		}
-		String label = sb.toString();
-		if (label.length() > 0) {
-			return label;
+		String[] labelAttrs = this.getLabelAttributes(item);
+		if (labelAttrs != null) {
+			StringBuilder sb = new StringBuilder();
+			for (String attr : labelAttrs) {
+				sb.append(this.getValue(item, attr, ""));
+			}
+			return sb.toString();
 		}
 		return null;
 	}
 
 	@Override
 	public String[] getLabelAttributes(Item item) {
-		JsonItem itm = this.assertItem(item);
-		if (itm.datum.containsKey("name")) {
-			return new String[] { "name" };
+		this.assertItem(item);
+
+		String[] attrs = new String[0];
+
+		for (String attr : this.labelAttributes) {
+			if (this.hasAttribute(item, attr)) {
+				String[] newAttrs = new String[attrs.length + 1];
+				System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+				newAttrs[newAttrs.length - 1] = attr;
+				attrs = newAttrs;
+			}
 		}
-		return null;
+		return attrs.length > 0 ? attrs : null;
 	}
 
-	protected Item ingestItem(Object rawItem) {
-		// TODO
-		Item wrapped = this.wrapItem(rawItem);
-		Item item = this.placeInIndex(wrapped);
+	protected List<Item> processRawItems(Request args, List<JSONObject> rawItems) {
+
+		List<Item> items = new ArrayList<Item>();
+		Iterator<JSONObject> itr = rawItems.iterator();
+		while (itr.hasNext()) {
+			JSONObject rawItem = itr.next();
+			Item item = this.ingestItem(rawItem);
+			items.add(item);
+		}
+		return items;
+	}
+
+	protected Item ingestItem(JSONValue rawItem) {
+		ReadItem wrapped = this.wrapItem(rawItem);
+		ReadItem item = this.placeInIndex(wrapped);
 		return item;
 	}
 
-	protected Item wrapItem(Object rawItem) {
-		JsonItem item = new JsonItem();
-		item.datum = (JSONObject) rawItem;
+	protected ReadItem wrapItem(JSONValue rawItem) {
+		ReadItem item = new ReadItem();
+		item.datum = rawItem;
 		item.store = this;
-		// TODO: Add the index information
+		item.index = this.items.size();
 		return item;
 	}
 
-	protected Item placeInIndex(Item item) {
-		// TODO: Actually index the item
+	protected ReadItem placeInIndex(ReadItem item) {
+		this.items.add(item.index, item);
 		return item;
 	}
 
-	protected JsonItem assertItem(Item item) {
+	protected ReadItem assertItem(Item item) {
 		if (!this.isItem(item)) {
 			throw new NoSuchElementException(
 					"Item is not a member of this store instance");
 		}
-		return (JsonItem) item;
+		return (ReadItem) item;
 	}
 
 }

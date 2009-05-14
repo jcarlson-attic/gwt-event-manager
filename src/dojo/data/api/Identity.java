@@ -4,13 +4,15 @@ import dojo.data.Item;
 
 public interface Identity {
 
-	<T> T getIdentity(Item item);
+	String getIdentity(Item item);
 
-	<T> T[] getIdentityAttributes(Item item);
+	String[] getIdentityAttributes(Item item);
 
-	<T> void fetchItemByIdentity(T identity, FetchItemCallback callback);
+	void fetchItemByIdentity(FetchItemCallback callback);
 
 	public interface FetchItemCallback {
+
+		String identity();
 
 		void onItem(Item item);
 

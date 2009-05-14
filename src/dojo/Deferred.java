@@ -107,7 +107,7 @@ public class Deferred {
 	private void check() {
 		if (this.fired != -1) {
 			if (!this.silentlyCancelled) {
-				throw new Error("already called");
+				throw new IllegalStateException("Deferred already fired");
 			}
 			this.silentlyCancelled = false;
 		}

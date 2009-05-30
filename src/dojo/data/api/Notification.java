@@ -1,5 +1,7 @@
 package dojo.data.api;
 
+import com.google.gwt.json.client.JSONValue;
+
 import dojo.data.Item;
 
 public interface Notification {
@@ -9,12 +11,13 @@ public interface Notification {
 	void removeNotificationListener(NotificationListener listener);
 
 	public interface NotificationListener {
-		<T> void onSet(Item item, String attribute, T oldValue, T newValue);
+		void onSet(Item item, String attribute, JSONValue oldValue,
+				JSONValue newValue);
 
 		void onNew(Item newItem);
 
-		<T> void onNew(Item newItem, Item parent, String attribute, T oldValue,
-				T newValue);
+		void onNew(Item newItem, Item parent, String attribute,
+				JSONValue oldValue, JSONValue newValue);
 
 		void onDelete(Item deletedItem);
 	}

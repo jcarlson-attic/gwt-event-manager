@@ -1,25 +1,28 @@
 package dojo.data.api;
 
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONValue;
+
 import dojo.Deferred;
 import dojo.data.Item;
 
 public interface Read {
 
-	<T> T getValue(Item item, String attribute, T defaultValue);
+	JSONValue getValue(Item item, String attribute, JSONValue defaultValue);
 
-	<T> T[] getValues(Item item, String attribute);
+	JSONArray getValues(Item item, String attribute);
 
 	String[] getAttributes(Item item);
 
 	boolean hasAttribute(Item item, String attribute);
 
-	<T> boolean containsValue(Item item, String attribute, T value);
+	boolean containsValue(Item item, String attribute, JSONValue value);
 
 	boolean isItem(Object item);
 
 	boolean isItemLoaded(Item item);
 
-	void loadItem(LoadItemCallback callback);
+	void loadItem(Item item, LoadItemCallback callback);
 
 	Deferred fetch(Request args);
 
@@ -30,8 +33,6 @@ public interface Read {
 	String[] getLabelAttributes(Item item);
 
 	public interface LoadItemCallback {
-
-		Item item();
 
 		void onItem(Item item);
 

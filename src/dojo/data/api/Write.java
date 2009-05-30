@@ -1,5 +1,7 @@
 package dojo.data.api;
 
+import com.google.gwt.json.client.JSONValue;
+
 import dojo.data.Item;
 
 public interface Write {
@@ -10,9 +12,9 @@ public interface Write {
 
 	boolean deleteItem(Item item);
 
-	<T> boolean setValue(Item item, String attribute, T value);
+	boolean setValue(Item item, String attribute, JSONValue value);
 
-	<T> boolean setValues(Item item, String attribute, T[] values);
+	boolean setValues(Item item, String attribute, JSONValue[] values);
 
 	boolean unsetAttribute(Item item, String attribute);
 

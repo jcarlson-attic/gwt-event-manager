@@ -8,11 +8,9 @@ public interface Identity {
 
 	String[] getIdentityAttributes(Item item);
 
-	void fetchItemByIdentity(FetchItemCallback callback);
+	void fetchItemByIdentity(String identity, FetchItemCallback callback);
 
 	public interface FetchItemCallback {
-
-		String identity();
 
 		void onItem(Item item);
 

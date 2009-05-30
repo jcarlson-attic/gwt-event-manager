@@ -5,21 +5,21 @@ import java.util.Map;
 
 import dojo.data.Item;
 
-public interface Request {
+public class Request {
 
-	Map<String, Object> query();
+	public Map<String, Object> query;
 
-	String queryString();
+	public String queryString;
 
-	Map<String, Object> queryOptions();
+	public Map<String, Object> queryOptions;
 
-	FetchCallback fetchCallback();
+	public FetchCallback fetchCallback;
 
-	Integer start();
+	public Integer start;
 
-	Integer count();
+	public Integer count;
 
-	Sort[] sort();
+	public Sort[] sort;
 
 	public interface FetchCallback {
 		void onBegin(int size, Request request);

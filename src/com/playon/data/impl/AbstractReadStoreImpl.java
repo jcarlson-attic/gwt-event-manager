@@ -1,13 +1,14 @@
 package com.playon.data.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
 import dojo.Deferred;
@@ -16,7 +17,7 @@ import dojo.data.Item;
 import dojo.data.Store;
 import dojo.data.api.Read;
 import dojo.data.api.Request;
-import dojo.data.api.Request.FetchCallback;
+import dojo.data.api.Response;
 
 public abstract class AbstractReadStoreImpl implements Store, Read {
 
@@ -38,27 +39,44 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 	}
 
 	@Override
-	public <T> T getValue(Item item, String attribute, T defaultValue) {
-		ReadItem itm = this.assertItem(item);
+	public JSONValue getValue(Item item, String attribute,
+			JSONValue defaultValue) {
+		if (!this.isItem(item)) {
+			throw new NoSuchElementException(
+					"Item is not a member of this store instance");
+		}
+		ReadItem itm = (ReadItem) item;
 
-		if (!this.hasAttribute(itm, attribute)) {
-			return defaultValue;
+		if (this.hasAttribute(itm, attribute)) {
+			JSONObject datum = itm.datum.isObject();
+			return datum.get(attribute);
 		}
 
-		// TODO
 		return null;
 	}
 
 	@Override
-	public <T> T[] getValues(Item item, String attribute) {
-		this.assertItem(item);
-		T[] values = this.getValue(item, attribute, null);
-		return values;
+	public JSONArray getValues(Item item, String attribute) {
+		if (!this.isItem(item)) {
+			throw new NoSuchElementException(
+					"Item is not a member of this store instance");
+		}
+		JSONValue values = this.getValue(item, attribute, null);
+		if (values.isArray() != null) {
+			return values.isArray();
+		}
+		JSONArray array = new JSONArray();
+		array.set(0, values);
+		return array;
 	}
 
 	@Override
 	public String[] getAttributes(Item item) {
-		ReadItem itm = this.assertItem(item);
+		if (!this.isItem(item)) {
+			throw new NoSuchElementException(
+					"Item is not a member of this store instance");
+		}
+		ReadItem itm = (ReadItem) item;
 		JSONObject obj = itm.datum.isObject();
 		if (obj != null) {
 			Set<String> keys = obj.keySet();
@@ -71,7 +89,11 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 
 	@Override
 	public boolean hasAttribute(Item item, String attribute) {
-		ReadItem itm = this.assertItem(item);
+		if (!this.isItem(item)) {
+			throw new NoSuchElementException(
+					"Item is not a member of this store instance");
+		}
+		ReadItem itm = (ReadItem) item;
 		JSONObject obj = itm.datum.isObject();
 		if (obj != null) {
 			return obj.containsKey(attribute);
@@ -80,10 +102,11 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 	}
 
 	@Override
-	public <T> boolean containsValue(Item item, String attribute, T value) {
-		T[] values = this.getValues(item, attribute);
+	public boolean containsValue(Item item, String attribute, JSONValue value) {
+		JSONArray values = this.getValues(item, attribute);
 
-		for (T val : values) {
+		for (int i = 0; i < values.size(); i++) {
+			JSONValue val = values.get(i);
 			if (val == value) {
 				return true;
 			}
@@ -93,21 +116,9 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 
 	@Override
 	public boolean isItem(Object object) {
-		if (!(object instanceof ReadItem)) {
-			return false;
-		}
-
-		ReadItem item = (ReadItem) object;
-
-		if (item.store != this) {
-			return false;
-		}
-
-		ReadItem inItems = (ReadItem) this.items.get(item.index);
-		if (inItems.datum != item.datum) {
-			return false;
-		}
-		return true;
+		return object != null && object instanceof ReadItem
+				&& ((ReadItem) object).store == this
+				&& this.items.get(((ReadItem) object).index) == object;
 	}
 
 	@Override
@@ -116,42 +127,39 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 	}
 
 	@Override
-	public void loadItem(final LoadItemCallback callback) {
+	public void loadItem(Item item, final LoadItemCallback callback) {
 		// no-op
 	}
 
 	@Override
-	public Deferred fetch(final Request args) {
+	public Deferred fetch(final Request request) {
 		Deferred dfd = new Deferred();
 
-		dfd.addCallbacks(new DeferredCommand() {
-
+		dfd.addCallback(new DeferredCommand() {
 			@Override
-			public <T> List<Item> execute(T results) {
-				FetchCallback cb = args.fetchCallback();
-
-				List<Item> items = AbstractReadStoreImpl.this.processRawItems(
-						args, (List<JSONObject>) results);
-
-				cb.onBegin(items.size(), args);
-
-				// TODO: Sort
-
-				for (Item item : items) {
-					cb.onItem(item, args);
-				}
-
-				// TODO: Violates Dojo API. Use null instead of items if onItem
-				// was present
-				cb.onComplete(items, args);
-
-				return items;
+			public <T> Response execute(T response) {
+				return AbstractReadStoreImpl.this.processRawItems(request,
+						(Response) response);
 			}
-
-		}, new DeferredCommand() {
+		});
+		dfd.addCallback(new DeferredCommand() {
+			@Override
+			public <T> Response execute(T response) {
+				return AbstractReadStoreImpl.this.sortItems(request,
+						(Response) response);
+			}
+		});
+		dfd.addCallback(new DeferredCommand() {
+			@Override
+			public <T> Response execute(T response) {
+				return AbstractReadStoreImpl.this.doFetchCallbacks(request,
+						(Response) response);
+			}
+		});
+		dfd.addErrback(new DeferredCommand() {
 			@Override
 			public <T> T execute(T result) {
-				FetchCallback cb = args.fetchCallback();
+				Request.FetchCallback cb = request.fetchCallback;
 				cb.onError((Exception) result);
 				return result;
 			}
@@ -171,7 +179,7 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 		if (labelAttrs != null) {
 			StringBuilder sb = new StringBuilder();
 			for (String attr : labelAttrs) {
-				sb.append(this.getValue(item, attr, ""));
+				sb.append(this.getValue(item, attr, new JSONString("")));
 			}
 			return sb.toString();
 		}
@@ -180,7 +188,10 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 
 	@Override
 	public String[] getLabelAttributes(Item item) {
-		this.assertItem(item);
+		if (!this.isItem(item)) {
+			throw new NoSuchElementException(
+					"Item is not a member of this store instance");
+		}
 
 		String[] attrs = new String[0];
 
@@ -195,16 +206,38 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 		return attrs.length > 0 ? attrs : null;
 	}
 
-	protected List<Item> processRawItems(Request args, List<JSONObject> rawItems) {
+	protected Response processRawItems(Request request, Response response) {
 
 		List<Item> items = new ArrayList<Item>();
-		Iterator<JSONObject> itr = rawItems.iterator();
-		while (itr.hasNext()) {
-			JSONObject rawItem = itr.next();
+		for (int i = 0; i < response.rawItems.size(); i++) {
+			JSONValue rawItem = response.rawItems.get(i);
 			Item item = this.ingestItem(rawItem);
 			items.add(item);
 		}
-		return items;
+		response.items = items;
+		return response;
+	}
+
+	protected Response sortItems(Request request, Response response) {
+		// TODO: SortItems
+		return response;
+	}
+
+	protected Response doFetchCallbacks(Request request, Response response) {
+		Request.FetchCallback cb = request.fetchCallback;
+
+		if (cb != null) {
+			cb.onBegin(response.items.size(), request);
+
+			for (int i = 0; i < response.items.size(); i++) {
+				cb.onItem(response.items.get(i), request);
+			}
+
+			cb.onComplete(response.items, request);
+
+		}
+
+		return response;
 	}
 
 	protected Item ingestItem(JSONValue rawItem) {
@@ -224,14 +257,6 @@ public abstract class AbstractReadStoreImpl implements Store, Read {
 	protected ReadItem placeInIndex(ReadItem item) {
 		this.items.add(item.index, item);
 		return item;
-	}
-
-	protected ReadItem assertItem(Item item) {
-		if (!this.isItem(item)) {
-			throw new NoSuchElementException(
-					"Item is not a member of this store instance");
-		}
-		return (ReadItem) item;
 	}
 
 }

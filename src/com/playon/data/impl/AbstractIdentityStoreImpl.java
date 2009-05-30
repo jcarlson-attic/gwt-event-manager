@@ -3,8 +3,8 @@ package com.playon.data.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
 import dojo.data.Item;
@@ -16,10 +16,10 @@ public abstract class AbstractIdentityStoreImpl extends AbstractReadStoreImpl
 
 	public static final String ID_ATTRIBUTES = "idAttributes";
 
-	private static final String ID_ATTR = "id";
+	private static final String ID_ATTR = "uri";
 
 	protected Map<String, IdentityItem> index = new HashMap<String, IdentityItem>();
-	private String[] idAttributes = new String[] { ID_ATTR };
+	protected String[] idAttributes = new String[] { ID_ATTR };
 
 	public AbstractIdentityStoreImpl() {
 	}
@@ -39,23 +39,33 @@ public abstract class AbstractIdentityStoreImpl extends AbstractReadStoreImpl
 
 	@Override
 	public String getIdentity(Item item) {
-		return this._getIdentity(((ReadItem) item).datum);
+		if (!this.isItem(item)) {
+			throw new NoSuchElementException(
+					"Item is not a member of this store instance");
+		}
+		String idty = this._getIdentity(((ReadItem) item).datum);
+		if (idty == null || idty == "") {
+			throw new UnsupportedOperationException("Item is not identifiable");
+		}
+		return idty;
 	}
 
 	protected String _getIdentity(JSONValue rawItem) {
-		JSONObject obj = rawItem.isObject();
-		if (obj == null) {
+		if (rawItem == null || rawItem.isObject() == null) {
 			return null;
 		}
 
 		String[] identifiers = this._getIdentityAttributes(rawItem);
-		StringBuilder sb = new StringBuilder();
+		if (identifiers == null) {
+			return null;
+		}
 
-		for (String attr : identifiers) {
-			if (!obj.containsKey(attr)) {
-				throw new IllegalStateException("Item is not identifiable");
+		StringBuilder sb = new StringBuilder();
+		for (String identifier : identifiers) {
+			if (!rawItem.isObject().containsKey(identifier)) {
+				return null;
 			}
-			sb.append(obj.get(attr));
+			sb.append(rawItem.isObject().get(identifier));
 		}
 		return sb.toString();
 	}
@@ -70,38 +80,20 @@ public abstract class AbstractIdentityStoreImpl extends AbstractReadStoreImpl
 	}
 
 	protected String[] _getIdentityAttributes(JSONValue rawItem) {
-		JSONObject obj = rawItem.isObject();
-		if (obj == null) {
-			return null;
-		}
-
-		String[] attrs = new String[0];
-
-		for (String attr : this.idAttributes) {
-			if (obj.containsKey(attr)) {
-				String[] newAttrs = new String[attrs.length + 1];
-				System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
-				newAttrs[newAttrs.length - 1] = attr;
-				attrs = newAttrs;
-			}
-		}
+		String[] attrs = this.idAttributes;
 		return attrs.length > 0 ? attrs : null;
 	}
 
 	@Override
-	public void fetchItemByIdentity(final FetchItemCallback callback) {
-		final Item item = this.index.get(callback.identity());
+	public void fetchItemByIdentity(String identity,
+			final FetchItemCallback callback) {
+		final Item item = this.index.get(identity);
 
 		if (item != null) {
 			if (this.isItemLoaded(item)) {
 				callback.onItem(item);
 			} else {
-				this.loadItem(new LoadItemCallback() {
-
-					@Override
-					public Item item() {
-						return item;
-					}
+				this.loadItem(item, new LoadItemCallback() {
 
 					@Override
 					public void onError(Exception error) {
@@ -116,64 +108,30 @@ public abstract class AbstractIdentityStoreImpl extends AbstractReadStoreImpl
 				});
 			}
 		} else {
-			this.fetch(new Request() {
+			Request request = new Request();
+			request.queryString = identity;
+			request.fetchCallback = new Request.FetchCallback() {
 
 				@Override
-				public Integer count() {
-					return null;
+				public void onBegin(int size, Request request) {
 				}
 
 				@Override
-				public FetchCallback fetchCallback() {
-					return new FetchCallback() {
-
-						@Override
-						public void onBegin(int size, Request request) {
-						}
-
-						@Override
-						public void onComplete(List<Item> items, Request request) {
-						}
-
-						@Override
-						public void onError(Exception error) {
-							callback.onError(error);
-						}
-
-						@Override
-						public void onItem(Item item, Request request) {
-							callback.onItem(item);
-						}
-
-					};
+				public void onComplete(List<Item> items, Request request) {
 				}
 
 				@Override
-				public Map<String, Object> query() {
-					return null;
+				public void onError(Exception error) {
+					callback.onError(error);
 				}
 
 				@Override
-				public String queryString() {
-					return callback.identity();
+				public void onItem(Item item, Request request) {
+					callback.onItem(item);
 				}
 
-				@Override
-				public Map<String, Object> queryOptions() {
-					return null;
-				}
-
-				@Override
-				public Sort[] sort() {
-					return null;
-				}
-
-				@Override
-				public Integer start() {
-					return null;
-				}
-
-			});
+			};
+			this.fetch(request);
 		}
 	}
 
